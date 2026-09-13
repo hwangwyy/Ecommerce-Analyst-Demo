@@ -1,32 +1,36 @@
-import os
-
 import pandas as pd
 import logging
+
 from pathlib import Path
 from scripts import downloader
+from tools import cleaner
 
 def main():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
-
+    raw_df_ls: dict[str, pd.DataFrame] = {}
     try:
         url = "erfan4524/e-commerce-sales-data-analysis-and-eda"
         data_path = 'data/'
-
         downloader.dataset_download(url, output_dir=data_path)
 
-        df_ls = {}
         for file in Path(data_path).iterdir():
             file_name = Path(file).name
-            if file_name == ".complete" or file_name == "clean_final_data.csv":
-                continue
-            else:
-                logger.info(f"CSV file founded: {file_name}")
-                df_ls[file_name] = pd.read_csv(f"{data_path}/{file_name}")
-                logger.info(f"Added into df_ls")
-
+            if file.is_file() and file_name.find("*.csv") and not file_name == "clean_final_data.csv":
+                logger.info(f"CSV founded. Name: {file_name}.")
+                raw_df_ls[file_name] = pd.read_csv(f"{data_path}/{file_name}") # type: ignore
+                logger.info(f"Added {file_name} to raw_df_ls.")
     except Exception as e:
         logger.error(f"An exception occurred: {e}")
+
+    df_ls: dict[str, pd.DataFrame] = {}
+    # Cleaning phase
+    for csv in raw_df_ls:
+        # Customers pipeline
+        if csv == "customers.csv":
+            logger.info(f"Start cleaning {csv}")
+            raw_df = raw_df_ls[csv]
+            df_ls[csv] = cleaner.clean_customer(raw_df)
 
 if __name__ == "__main__":
     main()
