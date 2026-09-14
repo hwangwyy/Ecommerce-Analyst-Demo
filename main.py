@@ -9,6 +9,8 @@ def main():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
     raw_df_ls: dict[str, pd.DataFrame] = {}
+
+    # PHASE: EXTRACT
     try:
         url = "erfan4524/e-commerce-sales-data-analysis-and-eda"
         data_path = 'data/'
@@ -24,6 +26,8 @@ def main():
         logger.error(f"An exception occurred: {e}")
 
     df_ls: dict[str, pd.DataFrame] = {}
+
+    # PHASE: TRANSFORM
     # Cleaning phase
     for csv in raw_df_ls:
         # Customers pipeline
@@ -36,9 +40,15 @@ def main():
             raw_df = raw_df_ls[csv]
             df_ls[csv] = cleaner.clean_orders(raw_df)
         elif csv == "payments.csv":
-            pass
+            logger.info(f"Start cleaning {csv}")
+            raw_df = raw_df_ls[csv]
+            df_ls[csv] = cleaner.clean_payments(raw_df)
         elif csv == "products.csv":
-            pass
+            logger.info(f"Start cleaning {csv}")
+            raw_df = raw_df_ls[csv]
+            df_ls[csv] = cleaner.clean_products(raw_df)
+
+    # PHASE: LOAD
 
 if __name__ == "__main__":
     main()

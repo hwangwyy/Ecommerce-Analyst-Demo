@@ -1,6 +1,8 @@
 import pandas as pd
 import logging
 
+from narwhals import DataFrame
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger=logging.getLogger(__name__)
 
@@ -12,7 +14,7 @@ def view_data(df: pd.DataFrame):
     print("===========DESCRIBE==============")
     print(df.describe(include='all'))
     print("===========INFO==============")
-    print(df.info()) #type: ignore
+    print(df.info())
     print("===========TOTAL_NULL_SUM==============")
     print(df.isna().sum())
 
@@ -52,11 +54,22 @@ def clean_orders(df: pd.DataFrame) -> pd.DataFrame:
     df = df.dropna(subset='Quantity')
     df['Quantity'] = df['Quantity'].astype(int)
     logger.info("Changed dtype from float to int for Quantity column")
-    df = df.drop(df[df['Quantity'] < 1].index)
+    df = df[df['Quantity'] > 0]
     logger.info("Dropped outlier values in Quantity column")
     df['PaymentMethod'] = df['PaymentMethod'].fillna('Cash')
     logger.info("Filled Null value from PaymentMethod to Cash")
     return df #type: ignore
 
 def clean_payments(df: pd.DataFrame) -> pd.DataFrame:
-    pass
+    column_format(df)
+    df = df.drop_duplicates(keep='last')
+    logger.info("Dropped duplicates")
+    df = df.dropna(subset='PaymentDate')
+    logger.info("Dropped Null values from PaymentDate")
+    df['PaymentDate'] = pd.to_datetime(df['PaymentDate'])
+    logger.info("Changed PaymentDate to type date")
+    return df
+
+def clean_products(df: pd.DataFrame) -> pd.DataFrame:
+    logger.info("Nothing to clean. Start working on next step")
+    return df
