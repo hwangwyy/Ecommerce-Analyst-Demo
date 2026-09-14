@@ -56,4 +56,7 @@ def clean_orders(df: pd.DataFrame) -> pd.DataFrame:
     logger.info("Dropped outlier values in Quantity column")
     df['PaymentMethod'] = df['PaymentMethod'].fillna('Cash')
     logger.info("Filled Null value from PaymentMethod to Cash")
-    return df
+    return df #type: ignore
+
+def clean_payments(df: pd.DataFrame) -> pd.DataFrame:
+    pass

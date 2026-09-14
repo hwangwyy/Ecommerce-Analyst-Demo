@@ -31,6 +31,14 @@ def main():
             logger.info(f"Start cleaning {csv}")
             raw_df = raw_df_ls[csv]
             df_ls[csv] = cleaner.clean_customer(raw_df)
+        elif csv == "orders.csv":
+            logger.info(f"Start cleaning {csv}")
+            raw_df = raw_df_ls[csv]
+            df_ls[csv] = cleaner.clean_orders(raw_df)
+        elif csv == "payments.csv":
+            pass
+        elif csv == "products.csv":
+            pass
 
 if __name__ == "__main__":
     main()
