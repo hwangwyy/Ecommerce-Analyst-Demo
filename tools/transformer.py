@@ -1,8 +1,6 @@
 import pandas as pd
 import logging
 
-from narwhals import DataFrame
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger=logging.getLogger(__name__)
 
@@ -18,6 +16,8 @@ def view_data(df: pd.DataFrame):
     print("===========TOTAL_NULL_SUM==============")
     print(df.isna().sum())
 
+
+# SILVER LAYER
 def column_format(df: pd.DataFrame) -> pd.DataFrame:
     df.columns = df.columns.str.strip()
     logger.info("Columns formatted")
@@ -72,4 +72,17 @@ def clean_payments(df: pd.DataFrame) -> pd.DataFrame:
 
 def clean_products(df: pd.DataFrame) -> pd.DataFrame:
     logger.info("Nothing to clean. Start working on next step")
+    return df
+
+# GOLD LAYER
+def to_analytics(df_ls: dict[str, pd.DataFrame]) -> pd.DataFrame:
+    logger.info("Starting transform cleaned data to ready to use data for analytics")
+    customers_df = df_ls['customers.csv']
+    products_df = df_ls['products.csv']
+    payments_df = df_ls['payments.csv']
+    orders_df = df_ls['orders.csv']
+    orders_1 = pd.merge(customers_df, orders_df, on='CustomerID', how='inner')
+    orders_2 = pd.merge(orders_1, products_df, on='ProductID', how='inner')
+    df = pd.merge(orders_2, payments_df, on='OrderID', how='inner')
+    df = df.drop(columns=['SignupDate', 'PaymentDate'])
     return df

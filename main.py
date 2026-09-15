@@ -1,14 +1,16 @@
 import pandas as pd
 import logging
+import streamlit as st
+import plotly.express as px
 
 from pathlib import Path
 from scripts import downloader
-from tools import cleaner
+from tools import transformer
 
 def main():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logger = logging.getLogger(__name__)
-    raw_df_ls: dict[str, pd.DataFrame] = {}
+    raw_df_ls: dict[str, pd.DataFrame] = {} # BRONZE
 
     # PHASE: EXTRACT
     try:
@@ -27,27 +29,29 @@ def main():
 
     df_ls: dict[str, pd.DataFrame] = {}
 
-    # PHASE: TRANSFORM
+    # PHASE: TRANSFORM || SILVER
     # Cleaning phase
     for csv in raw_df_ls:
         # Customers pipeline
         if csv == "customers.csv":
             logger.info(f"Start cleaning {csv}")
             raw_df = raw_df_ls[csv]
-            df_ls[csv] = cleaner.clean_customer(raw_df)
+            df_ls[csv] = transformer.clean_customer(raw_df)
         elif csv == "orders.csv":
             logger.info(f"Start cleaning {csv}")
             raw_df = raw_df_ls[csv]
-            df_ls[csv] = cleaner.clean_orders(raw_df)
+            df_ls[csv] = transformer.clean_orders(raw_df)
         elif csv == "payments.csv":
             logger.info(f"Start cleaning {csv}")
             raw_df = raw_df_ls[csv]
-            df_ls[csv] = cleaner.clean_payments(raw_df)
+            df_ls[csv] = transformer.clean_payments(raw_df)
         elif csv == "products.csv":
             logger.info(f"Start cleaning {csv}")
             raw_df = raw_df_ls[csv]
-            df_ls[csv] = cleaner.clean_products(raw_df)
+            df_ls[csv] = transformer.clean_products(raw_df)
 
+    # PHASE: TRANSFORM || GOLD
+    df = transformer.to_analytics(df_ls)
     # PHASE: LOAD
 
 if __name__ == "__main__":
